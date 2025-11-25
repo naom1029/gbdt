@@ -28,7 +28,6 @@ classdef Tree < handle
         % 閾値(分割点)を求める
         function [best,threshold] = split(obj,node,grad,hess)% 適切な分割点を探索
             X = node.X;
-            Y = node.Y;
             bestGain = 0;
             best = [];
             threshold = [];
@@ -40,7 +39,6 @@ classdef Tree < handle
                 XX = X(:,feature);
                 [~, ix] = sortrows(XX); %ソートしたイデックスを返す。
                 x = X(ix,feature);
-                y = Y(:,ix);
                 grad = grad(ix);
                 hess = hess(ix);
                 
@@ -67,14 +65,13 @@ classdef Tree < handle
             end
         end
         
-        function [] = fit(obj,X,Y,grad,hess) % 決定木を生成
-            obj.root = Node(X,Y,0);
+        function [] = fit(obj,X,grad,hess) % 決定木を生成
+            obj.root = Node(X,0);
             obj.grow(obj.root,grad,hess);
         end
         
         function [] = grow(obj,node,grad,hess)
             X = node.X;
-            Y = node.Y;
             [bestFeature,bestThreshold] = obj.split(node,grad,hess);
             if isempty(bestFeature)
                 node.is_leaf = true;
@@ -87,8 +84,8 @@ classdef Tree < handle
             il = X(:,bestFeature) <= bestThreshold;
             ir = X(:,bestFeature) > bestThreshold;
             ndepth = node.depth + 1;
-            node.left = Node(X(il,:),Y(:,il),ndepth);
-            node.right = Node(X(ir,:),Y(:,ir),ndepth);
+            node.left = Node(X(il,:),ndepth);
+            node.right = Node(X(ir,:),ndepth);
             obj.grow(node.left,grad(il),hess(il));
             obj.grow(node.right,grad(ir),hess(ir));
         end
@@ -101,7 +98,7 @@ classdef Tree < handle
                 x = X(i,:);
                 current = obj.root;
                 while ~current.is_leaf
-                    if x(current.feature) < current.threshold
+                    if x(current.feature) <= current.threshold
                         current = current.left;
                     else
                         current = current.right;

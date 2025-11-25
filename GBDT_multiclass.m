@@ -33,6 +33,7 @@ classdef GBDT_multiclass < handle
                 y_pred(:,k) = obj.models(k).predict(X);
             end
             [~, ret] = max(y_pred, [], 2);
+            ret = ret - 1;
         end
     end
 end

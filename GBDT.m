@@ -22,7 +22,7 @@ classdef GBDT < handle
                 grad = obj.objective.grad(y,y_pred);
                 hess = obj.objective.hess(y,y_pred);
                 tree = Tree(obj.regLambda,obj.gamma);
-                tree.fit(X,y,grad,hess);
+                tree.fit(X,grad,hess);
                 y_pred = y_pred + obj.learningRate*tree.predict(X)';
                 obj.trees = [obj.trees;tree];
             end
